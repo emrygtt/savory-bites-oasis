@@ -20,6 +20,7 @@ import { Separator } from "@/components/ui/separator";
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginData, setLoginData] = useState({ username: "", password: "" });
+  const [activeTab, setActiveTab] = useState("home");
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -108,43 +109,53 @@ const Admin = () => {
           </div>
           <Separator className="my-4 bg-gray-700" />
           <nav className="space-y-2">
-            <TabsList className="flex flex-col items-start bg-transparent h-auto space-y-1 w-full">
-              <TabsTrigger 
-                value="home" 
-                className="w-full flex items-center justify-start px-4 py-3 text-left data-[state=active]:bg-restaurant-burgundy data-[state=active]:text-white"
+            <div className="flex flex-col items-start bg-transparent h-auto space-y-1 w-full">
+              <button 
+                onClick={() => setActiveTab("home")}
+                className={`w-full flex items-center justify-start px-4 py-3 text-left rounded-sm ${
+                  activeTab === "home" ? "bg-restaurant-burgundy text-white" : "hover:bg-gray-700"
+                }`}
               >
                 <Home size={18} className="mr-2" />
                 Dashboard
-              </TabsTrigger>
-              <TabsTrigger 
-                value="menu" 
-                className="w-full flex items-center justify-start px-4 py-3 text-left data-[state=active]:bg-restaurant-burgundy data-[state=active]:text-white"
+              </button>
+              <button 
+                onClick={() => setActiveTab("menu")}
+                className={`w-full flex items-center justify-start px-4 py-3 text-left rounded-sm ${
+                  activeTab === "menu" ? "bg-restaurant-burgundy text-white" : "hover:bg-gray-700"
+                }`}
               >
                 <UtensilsCrossed size={18} className="mr-2" />
                 Menu Management
-              </TabsTrigger>
-              <TabsTrigger 
-                value="gallery" 
-                className="w-full flex items-center justify-start px-4 py-3 text-left data-[state=active]:bg-restaurant-burgundy data-[state=active]:text-white"
+              </button>
+              <button 
+                onClick={() => setActiveTab("gallery")}
+                className={`w-full flex items-center justify-start px-4 py-3 text-left rounded-sm ${
+                  activeTab === "gallery" ? "bg-restaurant-burgundy text-white" : "hover:bg-gray-700"
+                }`}
               >
                 <Image size={18} className="mr-2" />
                 Gallery Management
-              </TabsTrigger>
-              <TabsTrigger 
-                value="contact" 
-                className="w-full flex items-center justify-start px-4 py-3 text-left data-[state=active]:bg-restaurant-burgundy data-[state=active]:text-white"
+              </button>
+              <button 
+                onClick={() => setActiveTab("contact")}
+                className={`w-full flex items-center justify-start px-4 py-3 text-left rounded-sm ${
+                  activeTab === "contact" ? "bg-restaurant-burgundy text-white" : "hover:bg-gray-700"
+                }`}
               >
                 <MessageSquare size={18} className="mr-2" />
                 Contact Information
-              </TabsTrigger>
-              <TabsTrigger 
-                value="about" 
-                className="w-full flex items-center justify-start px-4 py-3 text-left data-[state=active]:bg-restaurant-burgundy data-[state=active]:text-white"
+              </button>
+              <button 
+                onClick={() => setActiveTab("about")}
+                className={`w-full flex items-center justify-start px-4 py-3 text-left rounded-sm ${
+                  activeTab === "about" ? "bg-restaurant-burgundy text-white" : "hover:bg-gray-700"
+                }`}
               >
                 <Users size={18} className="mr-2" />
                 About Content
-              </TabsTrigger>
-            </TabsList>
+              </button>
+            </div>
           </nav>
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-5">
@@ -161,7 +172,15 @@ const Admin = () => {
 
       {/* Main Content */}
       <div className="ml-64 flex-1 p-8">
-        <Tabs defaultValue="home" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="hidden">
+            <TabsTrigger value="home">Dashboard</TabsTrigger>
+            <TabsTrigger value="menu">Menu Management</TabsTrigger>
+            <TabsTrigger value="gallery">Gallery Management</TabsTrigger>
+            <TabsTrigger value="contact">Contact Information</TabsTrigger>
+            <TabsTrigger value="about">About Content</TabsTrigger>
+          </TabsList>
+
           {/* Dashboard */}
           <TabsContent value="home">
             <div className="space-y-6">
@@ -583,3 +602,4 @@ const Admin = () => {
 };
 
 export default Admin;
+
