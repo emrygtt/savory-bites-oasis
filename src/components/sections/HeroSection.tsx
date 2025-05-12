@@ -1,8 +1,28 @@
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { getPageContent, initializeContent } from "@/utils/contentManager";
 
 const HeroSection = () => {
+  const [heroTitle, setHeroTitle] = useState("Çakıltaşı Beach");
+  const [heroDescription, setHeroDescription] = useState("Ege'nin kalbinde doğal lezzetlerin adresi. Denize sıfır konumda restoran, beach ve villa hizmetleri.");
+
+  useEffect(() => {
+    // Initialize content if needed
+    initializeContent();
+    
+    // Try to get content from beach page as our hero section data
+    const content = getPageContent("beach");
+    if (content) {
+      const introSection = content.sections.find(s => s.id === "intro");
+      if (introSection) {
+        setHeroTitle(introSection.title);
+        setHeroDescription(introSection.content);
+      }
+    }
+  }, []);
+
   return (
     <section className="relative h-screen flex items-center justify-center">
       {/* Background Image */}
@@ -18,10 +38,13 @@ const HeroSection = () => {
       {/* Content */}
       <div className="container mx-auto px-4 relative z-10 text-center">
         <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl font-bold text-restaurant-cream mb-6 leading-tight">
-          Çakıltaşı <span className="text-restaurant-gold">Beach</span>
+          {heroTitle.split(' ').map((word, idx) => 
+            idx === 1 ? <span key={idx} className="text-restaurant-gold">{word}</span> : 
+            <span key={idx}>{word}{' '}</span>
+          )}
         </h1>
         <p className="text-lg md:text-xl text-restaurant-cream/90 max-w-2xl mx-auto mb-8">
-          Ege'nin kalbinde doğal lezzetlerin adresi. Denize sıfır konumda restoran, beach ve villa hizmetleri.
+          {heroDescription}
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
           <Button asChild className="bg-restaurant-burgundy hover:bg-restaurant-burgundy/80 text-white border-2 border-restaurant-burgundy px-8 py-6">

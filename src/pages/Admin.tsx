@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,14 +12,33 @@ import {
   Image,
   MessageSquare,
   Users,
-  LogOut
+  LogOut,
+  FileText
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import ContentEditor from "@/components/admin/ContentEditor";
+import { initializeContent, getAllContent } from "@/utils/contentManager";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginData, setLoginData] = useState({ username: "", password: "" });
   const [activeTab, setActiveTab] = useState("home");
+  const [contentPages, setContentPages] = useState<string[]>([]);
+  const [selectedContentPage, setSelectedContentPage] = useState<string | null>(null);
+
+  // Initialize content system
+  useEffect(() => {
+    initializeContent();
+    
+    // Get available pages for content management
+    const allContent = getAllContent();
+    setContentPages(Object.keys(allContent));
+    
+    // Set first page as default selected if available
+    if (Object.keys(allContent).length > 0) {
+      setSelectedContentPage(Object.keys(allContent)[0]);
+    }
+  }, []);
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -120,6 +138,15 @@ const Admin = () => {
                 Dashboard
               </button>
               <button 
+                onClick={() => setActiveTab("content")}
+                className={`w-full flex items-center justify-start px-4 py-3 text-left rounded-sm ${
+                  activeTab === "content" ? "bg-restaurant-burgundy text-white" : "hover:bg-gray-700"
+                }`}
+              >
+                <FileText size={18} className="mr-2" />
+                İçerik Yönetimi
+              </button>
+              <button 
                 onClick={() => setActiveTab("menu")}
                 className={`w-full flex items-center justify-start px-4 py-3 text-left rounded-sm ${
                   activeTab === "menu" ? "bg-restaurant-burgundy text-white" : "hover:bg-gray-700"
@@ -175,6 +202,7 @@ const Admin = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="hidden">
             <TabsTrigger value="home">Dashboard</TabsTrigger>
+            <TabsTrigger value="content">İçerik Yönetimi</TabsTrigger>
             <TabsTrigger value="menu">Menu Management</TabsTrigger>
             <TabsTrigger value="gallery">Gallery Management</TabsTrigger>
             <TabsTrigger value="contact">Contact Information</TabsTrigger>
@@ -235,6 +263,39 @@ const Admin = () => {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Content Management */}
+          <TabsContent value="content">
+            <div className="space-y-6">
+              <h1 className="text-3xl font-serif font-bold text-gray-800">İçerik Yönetimi</h1>
+              
+              <div className="grid grid-cols-1 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Sayfa Seçin</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {contentPages.map((pageKey) => (
+                        <Button
+                          key={pageKey}
+                          variant={selectedContentPage === pageKey ? "default" : "outline"}
+                          className={selectedContentPage === pageKey ? "bg-restaurant-burgundy hover:bg-restaurant-burgundy/80" : ""}
+                          onClick={() => setSelectedContentPage(pageKey)}
+                        >
+                          {pageKey.charAt(0).toUpperCase() + pageKey.slice(1).replace('_', ' ')}
+                        </Button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {selectedContentPage && (
+                  <ContentEditor pageKey={selectedContentPage} />
+                )}
+              </div>
             </div>
           </TabsContent>
 
@@ -602,4 +663,3 @@ const Admin = () => {
 };
 
 export default Admin;
-

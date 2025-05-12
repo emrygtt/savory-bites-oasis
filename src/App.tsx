@@ -3,7 +3,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { initializeContent } from "@/utils/contentManager";
 
 // Import pages
 import Index from "./pages/Index";
@@ -24,35 +26,46 @@ import Misafirlerimizden from "./pages/Misafirlerimizden";
 import Blog from "./pages/Blog";
 import RestaurantGallery from "./pages/RestaurantGallery";
 
+const ContentInitializer = ({ children }: { children: React.ReactNode }) => {
+  useEffect(() => {
+    // Initialize CMS content
+    initializeContent();
+  }, []);
+
+  return <>{children}</>;
+};
+
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/menu" element={<Menu />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/galeri" element={<RestaurantGallery />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/hakkimizda" element={<Hakkimizda />} />
-          <Route path="/beach" element={<BeachPage />} />
-          <Route path="/plaj-galerisi" element={<BeachGallery />} />
-          <Route path="/villa-ozellikleri" element={<VillaOzellikleri />} />
-          <Route path="/fiyatlar" element={<VillaFiyatlar />} />
-          <Route path="/rezervasyon-formu" element={<RezervasyonFormu />} />
-          <Route path="/favori-lezzetlerimiz" element={<FavoriLezzetler />} />
-          <Route path="/misafirlerimizden" element={<Misafirlerimizden />} />
-          <Route path="/blog" element={<Blog />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <ContentInitializer>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/menu" element={<Menu />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/galeri" element={<RestaurantGallery />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/hakkimizda" element={<Hakkimizda />} />
+            <Route path="/beach" element={<BeachPage />} />
+            <Route path="/plaj-galerisi" element={<BeachGallery />} />
+            <Route path="/villa-ozellikleri" element={<VillaOzellikleri />} />
+            <Route path="/fiyatlar" element={<VillaFiyatlar />} />
+            <Route path="/rezervasyon-formu" element={<RezervasyonFormu />} />
+            <Route path="/favori-lezzetlerimiz" element={<FavoriLezzetler />} />
+            <Route path="/misafirlerimizden" element={<Misafirlerimizden />} />
+            <Route path="/blog" element={<Blog />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </ContentInitializer>
     </TooltipProvider>
   </QueryClientProvider>
 );
