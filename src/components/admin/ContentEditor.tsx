@@ -27,10 +27,17 @@ const ContentEditor = ({ pageKey }: ContentEditorProps) => {
   useEffect(() => {
     const loadContent = () => {
       setIsLoading(true);
-      // Using sync version for now, will switch to async when backend is ready
-      const pageContent = getPageContentSync(pageKey);
-      setContent(pageContent);
-      setIsLoading(false);
+      try {
+        // Using sync version for now, will switch to async when backend is ready
+        const pageContent = getPageContentSync(pageKey);
+        setContent(pageContent);
+      } catch (error) {
+        console.error("Error loading content:", error);
+        toast.error("İçerik yüklenirken bir hata oluştu");
+        // Create fallback content if needed
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadContent();

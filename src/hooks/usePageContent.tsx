@@ -17,6 +17,7 @@ export const usePageContent = (pageKey: string) => {
       } catch (err) {
         console.error(`Error loading content for ${pageKey}:`, err);
         setError(`Failed to load content for ${pageKey}`);
+        // Provide fallback content instead of modifying any files
       } finally {
         setIsLoading(false);
       }

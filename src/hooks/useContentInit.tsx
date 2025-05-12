@@ -6,7 +6,11 @@ export const useContentInit = () => {
   useEffect(() => {
     // Initialize content asynchronously
     const initialize = async () => {
-      await initializeContent();
+      try {
+        await initializeContent();
+      } catch (error) {
+        console.error("Error initializing content:", error);
+      }
     };
     
     initialize();
