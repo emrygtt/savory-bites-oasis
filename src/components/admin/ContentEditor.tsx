@@ -6,10 +6,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
-import { Plus, X, Save } from "lucide-react";
+import { Plus, X, Save, Loader2 } from "lucide-react";
+import ImageUploader from "./ImageUploader";
 import {
-  getPageContent,
-  updatePageContent,
+  getPageContentSync,
+  updatePageContentSync,
   PageContent,
   ContentSection
 } from "@/utils/contentManager";
@@ -21,11 +22,13 @@ interface ContentEditorProps {
 const ContentEditor = ({ pageKey }: ContentEditorProps) => {
   const [content, setContent] = useState<PageContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const loadContent = () => {
       setIsLoading(true);
-      const pageContent = getPageContent(pageKey);
+      // Using sync version for now, will switch to async when backend is ready
+      const pageContent = getPageContentSync(pageKey);
       setContent(pageContent);
       setIsLoading(false);
     };
@@ -56,13 +59,29 @@ const ContentEditor = ({ pageKey }: ContentEditorProps) => {
       });
     }
   };
+  
+  const handleImageUploaded = (index: number, imageUrl: string) => {
+    if (content) {
+      const updatedSections = [...content.sections];
+      updatedSections[index] = {
+        ...updatedSections[index],
+        imageUrl: imageUrl
+      };
+
+      setContent({
+        ...content,
+        sections: updatedSections
+      });
+    }
+  };
 
   const addNewSection = () => {
     if (content) {
       const newSection: ContentSection = {
         id: `section-${Date.now()}`,
         title: "Yeni Başlık",
-        content: "İçerik buraya..."
+        content: "İçerik buraya...",
+        imageUrl: ""
       };
 
       setContent({
@@ -86,10 +105,19 @@ const ContentEditor = ({ pageKey }: ContentEditorProps) => {
     }
   };
 
-  const saveChanges = () => {
+  const saveChanges = async () => {
     if (content) {
-      updatePageContent(pageKey, content);
-      toast.success("İçerik başarıyla kaydedildi");
+      setIsSaving(true);
+      try {
+        // Using sync version for now, will switch to async when backend is ready
+        updatePageContentSync(pageKey, content);
+        toast.success("İçerik başarıyla kaydedildi");
+      } catch (error) {
+        toast.error("İçerik kaydedilirken bir hata oluştu");
+        console.error("Error saving content:", error);
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -174,24 +202,11 @@ const ContentEditor = ({ pageKey }: ContentEditorProps) => {
                       />
                       <p className="text-xs text-gray-500 mt-1">Not: Yeni satır için "\n" kullanabilirsiniz.</p>
                     </div>
-                    {section.imageUrl !== undefined && (
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Görsel URL</label>
-                        <Input
-                          value={section.imageUrl || ""}
-                          onChange={(e) => handleSectionChange(index, "imageUrl", e.target.value)}
-                        />
-                        {section.imageUrl && (
-                          <div className="mt-2">
-                            <img 
-                              src={section.imageUrl} 
-                              alt={section.title} 
-                              className="max-h-32 rounded-md"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    <ImageUploader 
+                      currentImageUrl={section.imageUrl} 
+                      onImageUploaded={(url) => handleImageUploaded(index, url)}
+                      label="Bölüm Görseli"
+                    />
                   </div>
                 </AccordionContent>
               </AccordionItem>
@@ -201,8 +216,13 @@ const ContentEditor = ({ pageKey }: ContentEditorProps) => {
       </Card>
       
       <div className="flex justify-end">
-        <Button onClick={saveChanges} className="bg-restaurant-burgundy hover:bg-restaurant-burgundy/80 text-white flex items-center gap-2">
-          <Save size={16} /> Değişiklikleri Kaydet
+        <Button 
+          onClick={saveChanges} 
+          className="bg-restaurant-burgundy hover:bg-restaurant-burgundy/80 text-white flex items-center gap-2"
+          disabled={isSaving}
+        >
+          {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} 
+          {isSaving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
         </Button>
       </div>
     </div>

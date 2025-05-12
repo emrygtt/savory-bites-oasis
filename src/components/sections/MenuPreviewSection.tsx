@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { getPageContent, ContentSection, initializeContent } from "@/utils/contentManager";
+import usePageContent from "@/hooks/usePageContent";
 
 interface MenuItem {
   name: string;
@@ -32,13 +32,11 @@ const MenuPreviewSection = () => {
       image: "https://images.unsplash.com/photo-1625944525257-2d3c5a722258?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3"
     }
   ]);
+  
+  // Use our new hook to fetch content
+  const { content, isLoading } = usePageContent("favori_lezzetler");
 
   useEffect(() => {
-    // Initialize content if needed
-    initializeContent();
-    
-    // Try to get content from favori_lezzetler page
-    const content = getPageContent("favori_lezzetler");
     if (content) {
       const dishSections = content.sections.filter(s => 
         ["manti", "ciborek", "kabak", "ciger"].includes(s.id)
@@ -57,7 +55,7 @@ const MenuPreviewSection = () => {
         }
       }
     }
-  }, []);
+  }, [content]);
 
   return (
     <section className="section-padding bg-white">
@@ -67,26 +65,41 @@ const MenuPreviewSection = () => {
           Çakıltaşı'na gelenlerin asla vazgeçemediği özel tatlar
         </p>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {menuItems.map((item, index) => (
-            <div key={index} className="bg-restaurant-cream rounded-lg shadow-md overflow-hidden">
-              <div className="h-48 overflow-hidden">
-                <img 
-                  src={item.image} 
-                  alt={item.name}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-serif text-xl font-bold text-restaurant-charcoal">{item.name}</h3>
-                  <span className="text-restaurant-burgundy font-semibold">{item.price}</span>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3].map((_, index) => (
+              <div key={index} className="bg-restaurant-cream rounded-lg shadow-md overflow-hidden">
+                <div className="h-48 bg-gray-200 animate-pulse"></div>
+                <div className="p-6 space-y-3">
+                  <div className="h-6 bg-gray-300 animate-pulse rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-300 animate-pulse rounded w-full"></div>
+                  <div className="h-4 bg-gray-300 animate-pulse rounded w-5/6"></div>
                 </div>
-                <p className="text-gray-600 mb-4 text-sm">{item.description}</p>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {menuItems.map((item, index) => (
+              <div key={index} className="bg-restaurant-cream rounded-lg shadow-md overflow-hidden">
+                <div className="h-48 overflow-hidden">
+                  <img 
+                    src={item.image} 
+                    alt={item.name}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-serif text-xl font-bold text-restaurant-charcoal">{item.name}</h3>
+                    <span className="text-restaurant-burgundy font-semibold">{item.price}</span>
+                  </div>
+                  <p className="text-gray-600 mb-4 text-sm">{item.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         
         <div className="text-center mt-12">
           <Button asChild className="bg-restaurant-burgundy hover:bg-restaurant-burgundy/80 text-white px-8">

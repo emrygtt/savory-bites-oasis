@@ -4,7 +4,11 @@ import { initializeContent } from "@/utils/contentManager";
 
 export const useContentInit = () => {
   useEffect(() => {
-    // Initialize content
-    initializeContent();
+    // Initialize content asynchronously
+    const initialize = async () => {
+      await initializeContent();
+    };
+    
+    initialize();
   }, []);
 };

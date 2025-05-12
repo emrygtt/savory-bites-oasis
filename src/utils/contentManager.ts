@@ -1,5 +1,5 @@
-
 // Content management utility for storing and retrieving page content
+import { fetchPageContent, fetchAllContent, updatePageContent } from '@/services/apiService';
 
 // Define content types
 export type ContentSection = {
@@ -152,45 +152,72 @@ const defaultContent: SiteContent = {
   }
 };
 
-// Initialize content from localStorage or defaults
-export const initializeContent = (): void => {
+// Initialize content from API or default values
+export const initializeContent = async (): Promise<void> => {
+  // First, check if we already have content in localStorage
   const storedContent = localStorage.getItem('siteContent');
+  
   if (!storedContent) {
+    // Initialize with default content until API is available
     localStorage.setItem('siteContent', JSON.stringify(defaultContent));
+    
+    // In future, this would fetch from API:
+    // const apiContent = await fetchAllContent();
+    // if (Object.keys(apiContent).length === 0) {
+    //   localStorage.setItem('siteContent', JSON.stringify(defaultContent));
+    // }
   }
 };
 
 // Get all content
-export const getAllContent = (): SiteContent => {
+export const getAllContent = async (): Promise<SiteContent> => {
+  const content = await fetchAllContent();
+  return content || defaultContent;
+};
+
+// Get page content
+export const getPageContent = async (pageKey: string): Promise<PageContent | null> => {
+  const content = await fetchPageContent(pageKey);
+  return content || null;
+};
+
+// Update page content
+export const updateContent = async (pageKey: string, content: PageContent): Promise<boolean> => {
+  const result = await updatePageContent(pageKey, content);
+  return result.success;
+};
+
+// These functions keep the original sync API for backward compatibility
+// Will be deprecated once the async API is fully integrated
+export const getAllContentSync = (): SiteContent => {
   const content = localStorage.getItem('siteContent');
   return content ? JSON.parse(content) : defaultContent;
 };
 
-// Get page content
-export const getPageContent = (pageKey: string): PageContent | null => {
-  const allContent = getAllContent();
+export const getPageContentSync = (pageKey: string): PageContent | null => {
+  const allContent = getAllContentSync();
   return allContent[pageKey] || null;
 };
 
-// Update page content
-export const updatePageContent = (pageKey: string, content: PageContent): void => {
-  const allContent = getAllContent();
+export const updatePageContentSync = (pageKey: string, content: PageContent): void => {
+  const allContent = getAllContentSync();
   allContent[pageKey] = content;
   localStorage.setItem('siteContent', JSON.stringify(allContent));
 };
 
 // Add a new page
-export const addPage = (pageKey: string, content: PageContent): void => {
-  const allContent = getAllContent();
-  allContent[pageKey] = content;
-  localStorage.setItem('siteContent', JSON.stringify(allContent));
+export const addPage = async (pageKey: string, content: PageContent): Promise<boolean> => {
+  return await updateContent(pageKey, content);
 };
 
 // Delete a page
-export const deletePage = (pageKey: string): void => {
-  const allContent = getAllContent();
+export const deletePage = async (pageKey: string): Promise<boolean> => {
+  // This will be implemented with actual API call later
+  // For now use the sync version
+  const allContent = getAllContentSync();
   delete allContent[pageKey];
   localStorage.setItem('siteContent', JSON.stringify(allContent));
+  return true;
 };
 
 // Reset to default content

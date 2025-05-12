@@ -3,25 +3,48 @@ import { useEffect, useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { getPageContent, PageContent, initializeContent } from "@/utils/contentManager";
+import { getPageContent, PageContent } from "@/utils/contentManager";
+import { Loader2 } from "lucide-react";
 
 const VillaFiyatlar = () => {
   const [pageData, setPageData] = useState<PageContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize content if needed
-    initializeContent();
+    const loadContent = async () => {
+      setIsLoading(true);
+      try {
+        // Use async version to be ready for backend API
+        const content = await getPageContent("fiyatlar");
+        setPageData(content);
+      } catch (error) {
+        console.error("Error loading page content:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    // Load page content
-    const content = getPageContent("fiyatlar");
-    setPageData(content);
+    loadContent();
   }, []);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="flex items-center space-x-2">
+            <Loader2 size={24} className="animate-spin text-restaurant-burgundy" />
+            <p>Yükleniyor...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!pageData) {
     return (
       <Layout>
         <div className="min-h-[60vh] flex items-center justify-center">
-          <p>Yükleniyor...</p>
+          <p>İçerik bulunamadı</p>
         </div>
       </Layout>
     );
